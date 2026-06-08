@@ -1,40 +1,37 @@
 const teamMembers = [
   {
     name: "Yash Dode",
-    role: "Mission Lead",
+    role: "Analyst",
     department: "Internal Audit Engineering",
     image: "YD",
-    specialty: "Risk, automation, and technology controls",
+    specialty: "Cloud, Engineering, AWS CCP",
     quote: "Building smarter systems, one launch at a time.",
     stats: [
-      { label: "Projects", value: "08" },
-      { label: "Controls", value: "24" },
+      { label: "Projects", value: "02" },
       { label: "Impact", value: "High" },
     ],
   },
   {
-    name: "Team Member 2",
-    role: "Systems Engineer",
-    department: "Technology Risk",
-    image: "TM",
-    specialty: "Control testing and stakeholder delivery",
+    name: "Joshua Eng",
+    role: "Associate",
+    department: "Internal Audit Engineering",
+    image: "JE",
+    specialty: "Cloud, Engineering, AWS CCP",
     quote: "Precision matters before every launch.",
     stats: [
-      { label: "Projects", value: "06" },
-      { label: "Controls", value: "18" },
+      { label: "Projects", value: "07" },
       { label: "Impact", value: "High" },
     ],
   },
   {
-    name: "Team Member 3",
-    role: "Flight Analyst",
-    department: "Audit Analytics",
+    name: "Sushmi Gadepalli",
+    role: "Associate",
+    department: "Internal Audit Engineering",
     image: "TM",
-    specialty: "Dashboards, data quality, and reporting",
+    specialty: "Cloud, Engineering, AWS CCP",
     quote: "Data turns mission noise into signal.",
     stats: [
-      { label: "Projects", value: "05" },
-      { label: "Controls", value: "15" },
+      { label: "Projects", value: "04" },
       { label: "Impact", value: "Medium" },
     ],
   },
@@ -47,7 +44,6 @@ const teamMembers = [
     quote: "Every strong mission starts with clean execution.",
     stats: [
       { label: "Projects", value: "07" },
-      { label: "Controls", value: "21" },
       { label: "Impact", value: "High" },
     ],
   },
@@ -218,7 +214,7 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <div className="mt-5 grid grid-cols-3 gap-2">
+              <div className="mt-5 grid grid-cols-2 gap-2">
                 {member.stats.map((stat) => (
                   <div
                     key={stat.label}

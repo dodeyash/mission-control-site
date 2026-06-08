@@ -1,6 +1,6 @@
 const teamMembers = [
   {
-    name: "Yash Dode",
+    name: "Bob",
     role: "Analyst",
     department: "Internal Audit Engineering",
     image: "YD",
@@ -12,7 +12,7 @@ const teamMembers = [
     ],
   },
   {
-    name: "Joshua Eng",
+    name: "Ann",
     role: "Associate",
     department: "Internal Audit Engineering",
     image: "JE",
@@ -24,7 +24,7 @@ const teamMembers = [
     ],
   },
   {
-    name: "Sushmi Gadepalli",
+    name: "Sam",
     role: "Associate",
     department: "Internal Audit Engineering",
     image: "SG",
@@ -36,7 +36,7 @@ const teamMembers = [
     ],
   },
   {
-    name: "Liam Westhall",
+    name: "Sharon",
     role: "Senior Analyst",
     department: "Internal Audit Engineering",
     image: "LW",
@@ -48,7 +48,7 @@ const teamMembers = [
     ],
   },
   {
-    name: "Jackson McEwan",
+    name: "Jackson",
     role: "Senior Analyst",
     department: "Internal Audit Engineering",
     image: "JM",
@@ -107,21 +107,28 @@ export default function HomePage() {
             </div>
           </a>
 
-          <div className="flex items-center gap-3">
-            <a
-              href="/"
-              className="rounded-full border border-yellow-500/30 bg-yellow-500/10 px-5 py-3 text-xs font-black uppercase tracking-[0.2em] text-yellow-300"
-            >
-              Meet the Team
-            </a>
+        <div className="flex items-center gap-3">
+          <a
+            href="/"
+            className="rounded-full border border-yellow-500/30 bg-yellow-500/10 px-5 py-3 text-xs font-black uppercase tracking-[0.2em] text-yellow-300"
+          >
+            Meet the Team
+          </a>
 
-            <a
-              href="/mission"
-              className="rounded-full border border-white/15 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.2em] text-black transition hover:bg-gray-200"
-            >
-              Mission to the Moon Audit
-            </a>
-          </div>
+          <a
+            href="/mission"
+            className="rounded-full border border-white/15 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.2em] text-black transition hover:bg-gray-200"
+          >
+            Mission to the Moon Audit
+          </a>
+
+          <a
+            href="/future-of-ia"
+            className="rounded-full border border-white/15 bg-white/10 px-5 py-3 text-xs font-black uppercase tracking-[0.2em] text-white transition hover:bg-white hover:text-black"
+          >
+            Future of IA
+          </a>
+      </div>
         </nav>
 
         {/* Hero */}

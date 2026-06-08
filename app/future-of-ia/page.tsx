@@ -7,23 +7,34 @@ type Message = {
   text: string;
 };
 
-const contextFiles = [
-  {
-    name: "Audit methodology.pdf",
-    content:
-      "Audit reports should be concise, risk-focused, and written for executive stakeholders. Findings should clearly identify condition, risk, root cause, and recommendation.",
-  },
-  {
-    name: "Prior year report.docx",
-    content:
-      "Prior year reporting emphasized ownership clarity, control traceability, timely remediation, and consistent evidence standards.",
-  },
-  {
-    name: "Control standards.xlsx",
-    content:
-      "Control documentation should include control objective, control owner, frequency, evidence source, testing approach, and exception criteria.",
-  },
-];
+type ContextFile = {
+  name: string;
+  content: string;
+};
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const result = reader.result;
+
+      if (typeof result !== "string") {
+        reject(new Error("Could not read file."));
+        return;
+      }
+
+      const base64 = result.split(",")[1];
+      resolve(base64);
+    };
+
+    reader.onerror = () => {
+      reject(new Error("File reading failed."));
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function FutureOfIAPage() {
   const [documentText, setDocumentText] = useState(
@@ -34,15 +45,130 @@ Based on the uploaded background materials, the IA Copilot can refine this docum
 The future-state workflow allows users to upload background information, ask the assistant for targeted edits, and receive responses grounded in the relevant source materials.`
   );
 
+  const [contextFiles, setContextFiles] = useState<ContextFile[]>([
+    {
+      name: "Audit methodology.pdf",
+      content:
+        "Audit reports should be concise, risk-focused, and written for executive stakeholders. Findings should clearly identify condition, risk, root cause, and recommendation.",
+    },
+    {
+      name: "Prior year report.docx",
+      content:
+        "Prior year reporting emphasized ownership clarity, control traceability, timely remediation, and consistent evidence standards.",
+    },
+    {
+      name: "Control standards.xlsx",
+      content:
+        "Control documentation should include control objective, control owner, frequency, evidence source, testing approach, and exception criteria.",
+    },
+  ]);
+
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      text: "I can help rewrite, summarize, improve tone, or pull relevant context from your uploaded background files.",
+      text: "I can help rewrite, summarize, improve tone, or pull relevant context from your uploaded background files. Highlight a section in the document if you want me to edit only that part.",
     },
   ]);
 
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  const [selectedText, setSelectedText] = useState("");
+  const [selectionStart, setSelectionStart] = useState<number | null>(null);
+  const [selectionEnd, setSelectionEnd] = useState<number | null>(null);
+
+  function handleTextSelection(event: React.SyntheticEvent<HTMLTextAreaElement>) {
+    const target = event.currentTarget;
+    const start = target.selectionStart;
+    const end = target.selectionEnd;
+
+    if (start !== end) {
+      setSelectedText(target.value.substring(start, end));
+      setSelectionStart(start);
+      setSelectionEnd(end);
+    }
+  }
+
+  async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files || []);
+
+    if (files.length === 0) return;
+
+    setUploading(true);
+
+    try {
+      const encodedFiles = await Promise.all(
+        files.map(async (file) => ({
+          name: file.name,
+          type: file.type,
+          dataBase64: await fileToBase64(file),
+        }))
+      );
+
+      const response = await fetch("/api/upload-context", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          files: encodedFiles,
+        }),
+      });
+
+      const rawText = await response.text();
+
+      let data;
+
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        throw new Error(
+          `Upload route did not return JSON. Server said: ${rawText.slice(
+            0,
+            300
+          )}`
+        );
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || "File upload failed.");
+      }
+
+      const uploadedFiles: ContextFile[] = data.files.map(
+        (file: { name: string; content: string }) => ({
+          name: file.name,
+          content: file.content,
+        })
+      );
+
+      setContextFiles((current) => [...current, ...uploadedFiles]);
+
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          text: `${uploadedFiles.length} file(s) uploaded and added to context memory.`,
+        },
+      ]);
+    } catch (error) {
+      console.error(error);
+
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          text:
+            error instanceof Error
+              ? `Upload error: ${error.message}`
+              : "Unknown upload error.",
+        },
+      ]);
+    } finally {
+      setUploading(false);
+      event.target.value = "";
+    }
+  }
 
   async function sendMessage(userPrompt?: string) {
     const finalPrompt = userPrompt || prompt;
@@ -51,7 +177,9 @@ The future-state workflow allows users to upload background information, ask the
 
     const userMessage: Message = {
       role: "user",
-      text: finalPrompt,
+      text: selectedText
+        ? `${finalPrompt}\n\nSelected section:\n${selectedText}`
+        : finalPrompt,
     };
 
     setMessages((current) => [...current, userMessage]);
@@ -66,6 +194,7 @@ The future-state workflow allows users to upload background information, ask the
         },
         body: JSON.stringify({
           documentText,
+          selectedText,
           userPrompt: finalPrompt,
           contextFiles,
         }),
@@ -90,7 +219,10 @@ The future-state workflow allows users to upload background information, ask the
         ...current,
         {
           role: "assistant",
-          text: "Sorry, something went wrong while calling the assistant. Check your API key and terminal logs.",
+          text:
+            error instanceof Error
+              ? `API error: ${error.message}`
+              : "Unknown API error.",
         },
       ]);
     } finally {
@@ -98,19 +230,52 @@ The future-state workflow allows users to upload background information, ask the
     }
   }
 
-  function applyLastAssistantMessage() {
-    const lastAssistantMessage = [...messages]
+  function getLastAssistantMessage() {
+    return [...messages]
       .reverse()
       .find((message) => message.role === "assistant");
+  }
+
+  function applyLastAssistantMessageToDocument() {
+    const lastAssistantMessage = getLastAssistantMessage();
 
     if (!lastAssistantMessage) return;
 
     setDocumentText(lastAssistantMessage.text);
+    setSelectedText("");
+    setSelectionStart(null);
+    setSelectionEnd(null);
+  }
+
+  function applyLastAssistantMessageToSelectedSection() {
+    const lastAssistantMessage = getLastAssistantMessage();
+
+    if (
+      !lastAssistantMessage ||
+      selectionStart === null ||
+      selectionEnd === null ||
+      selectionStart === selectionEnd
+    ) {
+      return;
+    }
+
+    const before = documentText.slice(0, selectionStart);
+    const after = documentText.slice(selectionEnd);
+
+    setDocumentText(`${before}${lastAssistantMessage.text}${after}`);
+    setSelectedText("");
+    setSelectionStart(null);
+    setSelectionEnd(null);
+  }
+
+  function removeContextFile(fileName: string) {
+    setContextFiles((current) =>
+      current.filter((file) => file.name !== fileName)
+    );
   }
 
   return (
     <main className="min-h-screen bg-[#f5f7fa] text-slate-950">
-      {/* Top Navigation */}
       <nav className="border-b border-slate-200 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-5">
           <a href="/" className="flex items-center gap-3">
@@ -151,7 +316,6 @@ The future-state workflow allows users to upload background information, ask the
         </div>
       </nav>
 
-      {/* Hero */}
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-7xl px-8 py-10">
           <p className="text-sm font-black uppercase tracking-[0.35em] text-[#0033a0]">
@@ -165,28 +329,26 @@ The future-state workflow allows users to upload background information, ask the
               </h1>
 
               <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-600">
-                Edit a document in the center and use the side chat assistant to
-                rewrite, summarize, improve tone, and pull context from source
-                files.
+                Upload context files, highlight part of the document, and ask
+                GPT to rewrite, summarize, improve tone, or edit only the
+                selected section.
               </p>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-6 py-4">
               <p className="text-xs font-black uppercase tracking-widest text-slate-400">
-                API Status
+                Context Files
               </p>
               <p className="mt-1 text-2xl font-black text-[#0033a0]">
-                Connected
+                {contextFiles.length}
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Workspace */}
       <section className="mx-auto max-w-[1500px] px-8 py-8">
-        <div className="grid min-h-[760px] gap-6 lg:grid-cols-[280px_1fr_390px]">
-          {/* Left: Context Library */}
+        <div className="grid min-h-[760px] gap-6 lg:grid-cols-[300px_1fr_410px]">
           <aside className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -199,15 +361,22 @@ The future-state workflow allows users to upload background information, ask the
               <div className="h-3 w-3 rounded-full bg-green-500" />
             </div>
 
-            <div className="mt-6 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-center">
+            <label className="mt-6 block cursor-pointer rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-6 text-center transition hover:border-[#0033a0] hover:bg-blue-50">
+              <input
+                type="file"
+                multiple
+                accept=".pdf,.txt,.md,.csv,.json"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
               <p className="text-3xl">📄</p>
               <p className="mt-3 text-sm font-black text-slate-800">
-                Upload coming soon
+                {uploading ? "Uploading..." : "Upload context files"}
               </p>
               <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                Demo uses sample context
+                PDF, TXT, MD, CSV, JSON
               </p>
-            </div>
+            </label>
 
             <div className="mt-6 space-y-3">
               {contextFiles.map((item) => (
@@ -217,17 +386,20 @@ The future-state workflow allows users to upload background information, ask the
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-bold text-slate-900">
+                      <p className="break-words text-sm font-bold text-slate-900">
                         {item.name}
                       </p>
                       <p className="mt-1 text-xs text-slate-500">
-                        Available for retrieval
+                        {item.content.length.toLocaleString()} chars
                       </p>
                     </div>
 
-                    <span className="rounded-full bg-blue-50 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-[#0033a0]">
-                      Indexed
-                    </span>
+                    <button
+                      onClick={() => removeContextFile(item.name)}
+                      className="rounded-full bg-red-50 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-red-600"
+                    >
+                      Remove
+                    </button>
                   </div>
                 </div>
               ))}
@@ -238,12 +410,12 @@ The future-state workflow allows users to upload background information, ask the
                 Memory Status
               </p>
               <p className="mt-2 text-sm leading-relaxed text-blue-50">
-                These sample materials are passed to the API as context.
+                Uploaded text is passed to the API as context for each chat
+                request.
               </p>
             </div>
           </aside>
 
-          {/* Middle: Document Editor */}
           <section className="rounded-[2rem] border border-slate-200 bg-white shadow-sm">
             <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
               <div>
@@ -256,6 +428,12 @@ The future-state workflow allows users to upload background information, ask the
               </div>
 
               <div className="flex items-center gap-2">
+                {selectedText && (
+                  <span className="rounded-full bg-blue-50 px-4 py-2 text-xs font-black uppercase tracking-widest text-[#0033a0]">
+                    Section Selected
+                  </span>
+                )}
+
                 <button
                   onClick={() => setDocumentText("")}
                   className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-black uppercase tracking-widest text-slate-600 hover:border-red-400 hover:text-red-500"
@@ -275,21 +453,34 @@ The future-state workflow allows users to upload background information, ask the
                     Executive Summary
                   </h1>
                   <p className="mt-2 text-sm text-slate-500">
-                    Editable draft • Context enabled
+                    Highlight text to edit a specific section
                   </p>
                 </div>
 
                 <textarea
                   value={documentText}
                   onChange={(event) => setDocumentText(event.target.value)}
+                  onSelect={handleTextSelection}
+                  onMouseUp={handleTextSelection}
+                  onKeyUp={handleTextSelection}
                   className="mt-8 min-h-[470px] w-full resize-none border-none bg-transparent text-[15px] leading-8 text-slate-700 outline-none"
                   placeholder="Paste or write your audit document here..."
                 />
+
+                {selectedText && (
+                  <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-4">
+                    <p className="text-xs font-black uppercase tracking-widest text-[#0033a0]">
+                      Selected Section
+                    </p>
+                    <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-700">
+                      {selectedText}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </section>
 
-          {/* Right: Chat Assistant */}
           <aside className="flex flex-col rounded-[2rem] border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-200 px-5 py-5">
               <p className="text-xs font-black uppercase tracking-[0.25em] text-slate-400">
@@ -300,7 +491,7 @@ The future-state workflow allows users to upload background information, ask the
               <div className="mt-4 flex items-center gap-2 rounded-full bg-green-50 px-4 py-2">
                 <div className="h-2 w-2 rounded-full bg-green-500" />
                 <p className="text-xs font-bold text-green-700">
-                  Using sample context
+                  Using uploaded context
                 </p>
               </div>
             </div>
@@ -342,35 +533,48 @@ The future-state workflow allows users to upload background information, ask the
                 <button
                   onClick={() =>
                     sendMessage(
-                      "Rewrite the document to be more concise and executive-ready."
+                      selectedText
+                        ? "Rewrite the selected section to be more concise and executive-ready."
+                        : "Rewrite the document to be more concise and executive-ready."
                     )
                   }
                   className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:border-[#0033a0] hover:text-[#0033a0]"
                 >
                   Executive-ready
                 </button>
+
                 <button
                   onClick={() =>
-                    sendMessage("Summarize the document in three bullets.")
+                    sendMessage(
+                      selectedText
+                        ? "Summarize the selected section in three bullets."
+                        : "Summarize the document in three bullets."
+                    )
                   }
                   className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:border-[#0033a0] hover:text-[#0033a0]"
                 >
                   Summarize
                 </button>
+
                 <button
                   onClick={() =>
                     sendMessage(
-                      "Improve the audit tone and make the writing more professional."
+                      selectedText
+                        ? "Improve the audit tone of the selected section."
+                        : "Improve the audit tone and make the writing more professional."
                     )
                   }
                   className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:border-[#0033a0] hover:text-[#0033a0]"
                 >
                   Improve tone
                 </button>
+
                 <button
                   onClick={() =>
                     sendMessage(
-                      "Use the uploaded context to recommend improvements to this draft."
+                      selectedText
+                        ? "Use uploaded context to improve the selected section."
+                        : "Use the uploaded context to recommend improvements to this draft."
                     )
                   }
                   className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:border-[#0033a0] hover:text-[#0033a0]"
@@ -379,12 +583,22 @@ The future-state workflow allows users to upload background information, ask the
                 </button>
               </div>
 
-              <button
-                onClick={applyLastAssistantMessage}
-                className="mb-3 w-full rounded-xl border border-[#0033a0]/20 bg-blue-50 px-3 py-2 text-xs font-black uppercase tracking-widest text-[#0033a0] hover:bg-blue-100"
-              >
-                Apply last assistant response to document
-              </button>
+              <div className="mb-3 grid grid-cols-1 gap-2">
+                <button
+                  onClick={applyLastAssistantMessageToSelectedSection}
+                  disabled={!selectedText}
+                  className="rounded-xl border border-[#0033a0]/20 bg-blue-50 px-3 py-2 text-xs font-black uppercase tracking-widest text-[#0033a0] hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Apply response to selected section
+                </button>
+
+                <button
+                  onClick={applyLastAssistantMessageToDocument}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black uppercase tracking-widest text-slate-600 hover:border-[#0033a0] hover:text-[#0033a0]"
+                >
+                  Replace whole document with response
+                </button>
+              </div>
 
               <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white p-2">
                 <input
@@ -396,7 +610,11 @@ The future-state workflow allows users to upload background information, ask the
                     }
                   }}
                   className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm outline-none placeholder:text-slate-400"
-                  placeholder="Ask GPT to edit the document..."
+                  placeholder={
+                    selectedText
+                      ? "Ask GPT to edit selected section..."
+                      : "Ask GPT to edit the document..."
+                  }
                 />
                 <button
                   onClick={() => sendMessage()}

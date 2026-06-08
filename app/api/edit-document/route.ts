@@ -7,9 +7,17 @@ const client = new OpenAI({
 
 export async function POST(request: Request) {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json(
+        { error: "OPENAI_API_KEY is missing. Check your .env.local file." },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
 
     const documentText = body.documentText || "";
+    const selectedText = body.selectedText || "";
     const userPrompt = body.userPrompt || "";
     const contextFiles = body.contextFiles || [];
 
@@ -29,28 +37,31 @@ export async function POST(request: Request) {
 
     const response = await client.responses.create({
       model: "gpt-5.4-mini",
-      input: [
-        {
-          role: "system",
-          content:
-            "You are an Internal Audit document editing assistant. Help improve audit documents using a professional, concise, executive-ready tone. Use uploaded context when relevant. Do not invent facts. If context is missing, say what information would help.",
-        },
-        {
-          role: "user",
-          content: `
+      input: `
+You are an Internal Audit document editing assistant.
+
+Your job:
+- Help improve audit documents.
+- Use a concise, professional, executive-ready tone.
+- Use uploaded context when relevant.
+- Do not invent facts.
+- If a selected section is provided, edit ONLY that section unless the user asks otherwise.
+- If no selected section is provided, give guidance or rewrite the broader document based on the user's request.
+
 User request:
 ${userPrompt}
 
-Current document:
+Selected section to edit:
+${selectedText || "No specific section selected."}
+
+Full document:
 ${documentText}
 
-Available uploaded context:
-${contextText || "No uploaded context provided yet."}
+Uploaded context:
+${contextText || "No uploaded context provided."}
 
-Return a helpful edit, suggestion, rewrite, or explanation. If rewriting, provide a polished version and briefly explain what changed.
-          `,
-        },
-      ],
+Return the best response. If editing selected text, provide the revised section only, then briefly explain what changed.
+      `,
     });
 
     return NextResponse.json({
@@ -59,9 +70,9 @@ Return a helpful edit, suggestion, rewrite, or explanation. If rewriting, provid
   } catch (error) {
     console.error("Edit document API error:", error);
 
-    return NextResponse.json(
-      { error: "Something went wrong while calling the AI assistant." },
-      { status: 500 }
-    );
+    const message =
+      error instanceof Error ? error.message : "Unknown server error";
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

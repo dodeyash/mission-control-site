@@ -24,3 +24,185 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+@keyframes starDrift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100px);
+  }
+}
+
+@keyframes rocketVibration {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(1px);
+  }
+  50% {
+    transform: translateX(-1px);
+  }
+  75% {
+    transform: translateX(1px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes flamePulse {
+  from {
+    height: 74px;
+    opacity: 0.85;
+    transform: scaleX(0.9);
+  }
+  to {
+    height: 106px;
+    opacity: 1;
+    transform: scaleX(1.15);
+  }
+}
+
+@keyframes smokeExpand {
+  from {
+    opacity: 0.8;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 0.15;
+    transform: scale(1.6);
+  }
+}
+
+@keyframes touchdownFlash {
+  0% {
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+  }
+  50% {
+    box-shadow: 0 0 32px rgba(255, 255, 255, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+.star-drift {
+  animation: starDrift 35s linear infinite;
+}
+
+.rocket-vibration {
+  animation: rocketVibration 0.18s linear infinite;
+}
+
+.flame {
+  animation: flamePulse 0.16s infinite alternate;
+}
+
+.smoke-one {
+  animation: smokeExpand 1.5s ease-out infinite;
+}
+
+.smoke-two {
+  animation: smokeExpand 1.8s ease-out infinite;
+}
+
+.smoke-three {
+  animation: smokeExpand 2.1s ease-out infinite;
+}
+
+.touchdown-flash {
+  animation: touchdownFlash 1.5s ease-in-out infinite;
+}
+@keyframes touchdownSettle {
+  0% {
+    transform: translateY(-18px);
+  }
+  60% {
+    transform: translateY(4px);
+  }
+  80% {
+    transform: translateY(-2px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes landingBurn {
+  0% {
+    opacity: 1;
+    height: 42px;
+    transform: scaleX(1);
+  }
+  70% {
+    opacity: 0.65;
+    height: 24px;
+    transform: scaleX(0.8);
+  }
+  100% {
+    opacity: 0;
+    height: 8px;
+    transform: scaleX(0.5);
+  }
+}
+
+@keyframes landingDust {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.3) scaleY(0.5);
+  }
+  30% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1.8) scaleY(0.8);
+  }
+}
+
+@keyframes legDeployLeft {
+  from {
+    transform: rotate(0deg);
+    transform-origin: top center;
+  }
+  to {
+    transform: rotate(-34deg);
+    transform-origin: top center;
+  }
+}
+
+@keyframes legDeployRight {
+  from {
+    transform: rotate(0deg);
+    transform-origin: top center;
+  }
+  to {
+    transform: rotate(34deg);
+    transform-origin: top center;
+  }
+}
+
+.touchdown-settle {
+  animation: touchdownSettle 1.2s ease-out forwards;
+}
+
+.landing-burn {
+  animation: landingBurn 1.2s ease-out forwards;
+}
+
+.landing-dust {
+  animation: landingDust 1.4s ease-out forwards;
+}
+
+.landing-dust-delay {
+  animation: landingDust 1.8s ease-out 0.2s forwards;
+}
+
+.landing-leg-left {
+  animation: legDeployLeft 0.8s ease-out forwards;
+}
+
+.landing-leg-right {
+  animation: legDeployRight 0.8s ease-out forwards;
+}

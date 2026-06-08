@@ -4,7 +4,7 @@ const teamMembers = [
     role: "Analyst",
     department: "Internal Audit Engineering",
     image: "YD",
-    specialty: "Cloud, Engineering, AWS CCP",
+    specialty: "Cloud, Coding, Data, Analysis/Excel, AWS CCP",
     quote: "Building smarter systems, one launch at a time.",
     stats: [
       { label: "Projects", value: "02" },
@@ -28,7 +28,7 @@ const teamMembers = [
     role: "Associate",
     department: "Internal Audit Engineering",
     image: "SG",
-    specialty: "Cloud, Engineering, AWS CCP",
+    specialty: "Cloud, Coding, Data, Analysis/Excel, AWS CCP",
     quote: "Data turns mission noise into signal.",
     stats: [
       { label: "Projects", value: "04" },
@@ -40,10 +40,22 @@ const teamMembers = [
     role: "Senior Analyst",
     department: "Internal Audit Engineering",
     image: "LW",
-    specialty: "Cloud, Engineering, AWS CCP",
+    specialty: "Cloud, Coding, Data, Analysis/Excel, AWS CCP",
     quote: "Every strong mission starts with clean execution.",
     stats: [
-      { label: "Projects", value: "07" },
+      { label: "Projects", value: "20" },
+      { label: "Impact", value: "High" },
+    ],
+  },
+  {
+    name: "Jackson McEwan",
+    role: "Senior Analyst",
+    department: "Internal Audit Engineering",
+    image: "JM",
+    specialty: "Cloud, Coding, Data, Analysis/Excel, AWS CCP",
+    quote: "Every strong mission starts with clean execution.",
+    stats: [
+      { label: "Projects", value: "2" },
       { label: "Impact", value: "High" },
     ],
   },
@@ -137,7 +149,7 @@ export default function HomePage() {
 
             <div className="mt-5 grid grid-cols-3 gap-3">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-3xl font-black text-yellow-300">04</p>
+                <p className="text-3xl font-black text-yellow-300">06</p>
                 <p className="mt-1 text-xs uppercase tracking-widest text-gray-400">
                   Crew
                 </p>

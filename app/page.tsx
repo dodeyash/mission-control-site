@@ -40,7 +40,7 @@ const teamMembers = [
     role: "Senior Analyst",
     department: "Internal Audit Engineering",
     image: "LW",
-    specialty: "Process improvement and documentation",
+    specialty: "Cloud, Engineering, AWS CCP",
     quote: "Every strong mission starts with clean execution.",
     stats: [
       { label: "Projects", value: "07" },

@@ -1,18 +1,22 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
-    if (!process.env.OPENAI_API_KEY) {
+    const apiKey = process.env.OPENAI_API_KEY;
+
+    if (!apiKey) {
       return NextResponse.json(
-        { error: "OPENAI_API_KEY is missing. Check your .env.local file." },
+        { error: "OPENAI_API_KEY is missing. Add it in Vercel environment variables." },
         { status: 500 }
       );
     }
+
+    const client = new OpenAI({
+      apiKey,
+    });
 
     const body = await request.json();
 
@@ -36,7 +40,7 @@ export async function POST(request: Request) {
       .join("\n\n---\n\n");
 
     const response = await client.responses.create({
-      model: "gpt-5.4-mini",
+      model: "gpt-4.1-mini",
       input: `
 You are an Internal Audit document editing assistant.
 

@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       .join("\n\n---\n\n");
 
     const response = await client.responses.create({
-      model: "gpt-4.1-mini",
+      model: "gpt-5.4-mini",
       input: `
 You are an Internal Audit document editing assistant.
 
@@ -48,7 +48,7 @@ Your job:
 - Help improve audit documents.
 - Use a concise, professional, executive-ready tone.
 - Use uploaded context when relevant.
-- Do not invent facts.
+- Do not invent facts, and only return exactly what the user asks.
 - If a selected section is provided, edit ONLY that section unless the user asks otherwise.
 - If no selected section is provided, give guidance or rewrite the broader document based on the user's request.
 

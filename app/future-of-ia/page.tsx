@@ -325,12 +325,12 @@ The future-state workflow allows users to upload background information, ask the
           <div className="mt-4 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
             <div>
               <h1 className="max-w-4xl text-5xl font-black leading-none tracking-tight md:text-6xl">
-                GPT-powered audit document editing with context memory.
+                AI-powered audit document editing with context memory.
               </h1>
 
               <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-600">
                 Upload context files, highlight part of the document, and ask
-                GPT to rewrite, summarize, improve tone, or edit only the
+                AI to rewrite, summarize, improve tone, or edit only the
                 selected section.
               </p>
             </div>
@@ -450,7 +450,7 @@ The future-state workflow allows users to upload background information, ask the
                     Internal Audit
                   </p>
                   <h1 className="mt-3 text-3xl font-black">
-                    Executive Summary
+                    Control Design Assessment
                   </h1>
                   <p className="mt-2 text-sm text-slate-500">
                     Highlight text to edit a specific section
@@ -484,7 +484,7 @@ The future-state workflow allows users to upload background information, ask the
           <aside className="flex flex-col rounded-[2rem] border border-slate-200 bg-white shadow-sm">
             <div className="border-b border-slate-200 px-5 py-5">
               <p className="text-xs font-black uppercase tracking-[0.25em] text-slate-400">
-                GPT Assistant
+                AI Assistant
               </p>
               <h2 className="mt-1 text-xl font-black">Document Chat</h2>
 
@@ -612,8 +612,8 @@ The future-state workflow allows users to upload background information, ask the
                   className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm outline-none placeholder:text-slate-400"
                   placeholder={
                     selectedText
-                      ? "Ask GPT to edit selected section..."
-                      : "Ask GPT to edit the document..."
+                      ? "Ask AI to edit selected section..."
+                      : "Ask AI to edit the document..."
                   }
                 />
                 <button

@@ -135,7 +135,7 @@ export default function HomePage() {
         <div className="mb-16 grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
           <div>
             <p className="text-sm font-bold uppercase tracking-[0.45em] text-yellow-300">
-              Goldman Sachs × Space Mission
+              Internal Audit × Space Mission
             </p>
 
             <h1 className="mt-5 max-w-4xl text-6xl font-black leading-none tracking-tight md:text-7xl">

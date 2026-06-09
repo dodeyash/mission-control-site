@@ -423,7 +423,7 @@ The future-state workflow allows users to upload background information, ask the
                   Active Document
                 </p>
                 <h2 className="mt-1 text-2xl font-black">
-                  Audit Executive Summary
+                  Control Design Assessment 
                 </h2>
               </div>
 

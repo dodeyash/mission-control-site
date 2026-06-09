@@ -1,9 +1,9 @@
 const teamMembers = [
   {
-    name: "Bob",
-    role: "Analyst",
+    name: "Pilot",
+    role: "Mission Lead",
     department: "Internal Audit Engineering",
-    image: "YD",
+    image: "PT",
     specialty: "Cloud, Coding, Data, Analysis/Excel, AWS CCP",
     quote: "Building smarter systems, one launch at a time.",
     stats: [
@@ -12,10 +12,10 @@ const teamMembers = [
     ],
   },
   {
-    name: "Ann",
-    role: "Associate",
+    name: "Engineer",
+    role: "Systems Engineer",
     department: "Internal Audit Engineering",
-    image: "JE",
+    image: "ER",
     specialty: "Cloud, Engineering, AWS CCP",
     quote: "Precision matters before every launch.",
     stats: [
@@ -24,10 +24,10 @@ const teamMembers = [
     ],
   },
   {
-    name: "Sam",
-    role: "Associate",
+    name: "Team Member 3",
+    role: "Flight Analyst",
     department: "Internal Audit Engineering",
-    image: "SG",
+    image: "FA",
     specialty: "Cloud, Coding, Data, Analysis/Excel, AWS CCP",
     quote: "Data turns mission noise into signal.",
     stats: [
@@ -36,10 +36,10 @@ const teamMembers = [
     ],
   },
   {
-    name: "Sharon",
-    role: "Senior Analyst",
+    name: "Team Member 4",
+    role: "Control Specialist",
     department: "Internal Audit Engineering",
-    image: "LW",
+    image: "CS",
     specialty: "Cloud, Coding, Data, Analysis/Excel, AWS CCP",
     quote: "Every strong mission starts with clean execution.",
     stats: [
@@ -48,10 +48,10 @@ const teamMembers = [
     ],
   },
   {
-    name: "Jackson",
+    name: "Team Member 4",
     role: "Senior Analyst",
-    department: "Internal Audit Engineering",
-    image: "JM",
+    department: "Engineering",
+    image: "ST",
     specialty: "Cloud, Coding, Data, Analysis/Excel, AWS CCP",
     quote: "Every strong mission starts with clean execution.",
     stats: [
